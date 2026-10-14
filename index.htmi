@@ -1,0 +1,140 @@
+
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MBTI로 포켓몬 찾기 🌼</title>
+<style>
+* { box-sizing: border-box; }
+body {
+  margin: 0; padding: 25px 15px;
+  font-family: Arial, "Malgun Gothic", sans-serif;
+  background: #fff8e7; color: #514331;
+  text-align: center;
+}
+main { max-width: 650px; margin: auto; }
+h1 { font-size: 36px; line-height: 1.4; }
+.subtitle { color: #8b7b64; font-size: 17px; }
+.card {
+  background: #fffefa; border: 2px solid #f3e5c5;
+  border-radius: 25px; padding: 24px; margin-top: 20px;
+  box-shadow: 0 8px 24px #82652b12;
+}
+.grid {
+  display: grid; grid-template-columns: repeat(4, 1fr);
+  gap: 9px; margin-top: 22px;
+}
+button {
+  border: 2px solid #f0dfb6; background: #fff8e8;
+  color: #59482e; border-radius: 13px; padding: 13px 2px;
+  font-size: 16px; font-weight: bold; cursor: pointer;
+}
+button:hover { background: #ffe58d; border-color: #efc64f; }
+#result { display: none; }
+.emoji { font-size: 100px; margin: 15px; }
+.name { font-size: 34px; margin: 5px; }
+.tag {
+  display: inline-block; background: #fff0b9;
+  border-radius: 30px; padding: 7px 15px;
+}
+.reason {
+  background: #fff8e9; padding: 18px; border-radius: 15px;
+  line-height: 1.9; white-space: pre-line; margin-top: 20px;
+}
+.match {
+  background: #edf5e5; padding: 18px;
+  border-radius: 15px; margin-top: 15px; line-height: 1.8;
+}
+.reset { width: 100%; margin-top: 20px; background: #ffdf78; }
+footer { color: #9b8d77; font-size: 13px; margin: 25px 0; }
+@media(max-width:400px) {
+  h1 { font-size: 30px; }
+  .card { padding: 17px; }
+  .grid { gap: 6px; }
+  button { font-size: 14px; padding: 12px 1px; }
+}
+</style>
+</head>
+<body>
+<main>
+  <h1>🌼 MBTI로<br>나의 포켓몬 찾기 ✨</h1>
+  <p class="subtitle">내 성격과 닮은 포켓몬은 누구일까?</p>
+
+  <section class="card" id="select">
+    <h2>💛 나의 MBTI를 골라 줘!</h2>
+    <div class="grid" id="buttons"></div>
+  </section>
+
+  <section class="card" id="result" aria-live="polite">
+    <p id="type"></p>
+    <div class="emoji" id="emoji"></div>
+    <h2 class="name" id="name"></h2>
+    <span class="tag" id="tag"></span>
+    <div class="reason">
+      <strong>🌷 너와 닮은 이유</strong>
+      <p id="reason"></p>
+    </div>
+    <div class="match">
+      <strong>🤝 찰떡궁합 MBTI</strong>
+      <h2 id="match"></h2>
+      <p id="matchReason"></p>
+    </div>
+    <button class="reset" id="reset">↩ 다시 고르기</button>
+  </section>
+
+  <footer>포켓몬과 MBTI를 재미있게 연결한 팬 콘텐츠예요 💛</footer>
+</main>
+
+<script>
+const data = {
+ ISTJ:["꼬부기","🐢","믿음직한 원칙주의자","꼼꼼하고 책임감이 강한 모습이 꼬부기와 닮았어.\n차근차근 실력을 쌓고 맡은 일을 끝까지 해내는 든든한 타입!","ESFP","밝은 에너지로 일상에 즐거움을 더해 줘."],
+ ISFJ:["푸린","🎤","포근한 마음 지킴이","다른 사람의 기분을 잘 살피고 세심하게 챙겨.\n푸린의 노래처럼 주변에 편안함과 따뜻함을 전해 줘.","ESFP","서로를 챙기며 즐거운 추억을 쌓는 조합!"],
+ INFJ:["뮤","🩷","신비로운 이상주의자","상상력이 풍부하고 깊은 생각을 품고 있어.\n뮤처럼 자신만의 특별한 세계를 간직한 타입!","ENFP","깊은 생각과 자유로운 상상력이 만나는 조합!"],
+ INTJ:["뮤츠","🔮","전략적인 천재","큰 그림을 보고 목표를 향해 전략적으로 움직여.\n뮤츠처럼 독립적이고 분석적인 매력이 있어.","ENFP","계획에 새로운 가능성과 활기를 더해 줘."],
+ ISTP:["메타몽","🟣","자유로운 해결사","상황에 맞게 유연하게 대처하고 직접 해 보며 답을 찾아.\n메타몽처럼 자기만의 방식으로 문제를 해결해!","ESTJ","유연한 아이디어와 확실한 실행력이 만나는 조합!"],
+ ISFP:["이브이","🦊","감성적인 자유 영혼","자신만의 취향과 감성을 소중히 여겨.\n이브이처럼 다양한 가능성과 자연스러운 매력을 품고 있어.","ENFJ","서로의 개성을 발견하고 응원해 주는 조합!"],
+ INFP:["치라미","🐭","순수한 감성 탐험가","섬세한 마음과 자신만의 소중한 꿈을 간직하고 있어.\n작은 행복에서도 기쁨을 발견하는 다정한 타입!","ENFJ","서로의 마음을 이해하고 꿈을 응원하는 조합!"],
+ INTP:["폴리곤","💠","호기심 많은 분석가","새로운 원리를 알아내고 복잡한 문제를 탐구하는 걸 좋아해.\n폴리곤처럼 논리적인 사고와 독특한 발상이 돋보여.","ENTJ","깊은 분석과 과감한 추진력이 시너지를 내!"],
+ ESTP:["루카리오","🥊","대담한 액션 히어로","생각만 하기보다 직접 도전하며 기회를 잡는 행동파야.\n루카리오처럼 순발력이 뛰어나고 대응이 빨라!","ISFJ","과감한 도전과 세심한 배려가 서로를 보완해."],
+ ESFP:["피카츄","⚡","분위기 메이커","밝은 에너지와 친근한 매력으로 주변을 즐겁게 만들어.\n피카츄처럼 함께하는 순간을 소중히 여기는 타입!","ISTJ","신나는 에너지에 안정감을 더하는 조합!"],
+ ENFP:["파치리스","🐿️","반짝이는 아이디어 뱅크","호기심이 많고 새로운 가능성을 발견하는 걸 좋아해.\n파치리스처럼 통통 튀는 에너지로 주변을 밝혀 줘!","INFJ","풍부한 상상력과 깊은 이해가 어우러져."],
+ ENTP:["팬텀","👻","장난기 넘치는 발명가","남다른 관점으로 생각하고 재치 있는 아이디어를 떠올려.\n팬텀처럼 장난스럽고 예측하기 어려운 매력이 있어!","INTJ","기발한 발상과 치밀한 전략이 만나는 조합!"],
+ ESTJ:["윈디","🐕","든든한 리더","목표를 정하고 사람들과 힘을 합쳐 결과를 만들어.\n윈디처럼 용감하고 믿음직해서 의지가 되는 타입!","ISTP","추진력과 실용적인 문제 해결이 잘 어울려."],
+ ESFJ:["해피너스","💗","행복을 나누는 천사","주변 사람을 챙기고 함께 행복해지는 것을 중요하게 생각해.\n해피너스처럼 따뜻한 배려로 사람들을 편안하게 해 줘!","ISFP","서로의 감정을 존중하고 행복을 나누는 조합!"],
+ ENFJ:["가디안","🪄","마음을 읽는 수호자","사람들의 마음을 이해하고 더 나은 방향으로 이끌어 줘.\n가디안처럼 소중한 사람을 지키고 진심으로 응원해!","INFP","따뜻한 리더십과 섬세한 감성이 서로를 빛내!"],
+ ENTJ:["망나뇽","🐉","목표를 향한 전략가","큰 목표를 세우고 과감하게 실행에 옮기는 추진력이 있어.\n망나뇽처럼 강인하고 믿음직하며 앞장서는 타입!","INTP","대담한 실행력과 깊이 있는 분석이 힘을 합쳐."]
+};
+
+const buttons = document.getElementById("buttons");
+
+Object.keys(data).forEach(type => {
+  const button = document.createElement("button");
+  button.textContent = type;
+  button.addEventListener("click", () => showResult(type));
+  buttons.appendChild(button);
+});
+
+function showResult(type) {
+  const p = data[type];
+  document.getElementById("type").textContent = type + " 유형의 포켓몬";
+  document.getElementById("emoji").textContent = p[1];
+  document.getElementById("name").textContent = p[0];
+  document.getElementById("tag").textContent = p[2];
+  document.getElementById("reason").textContent = p[3];
+  document.getElementById("match").textContent = p[4];
+  document.getElementById("matchReason").textContent = p[5];
+
+  document.getElementById("select").style.display = "none";
+  document.getElementById("result").style.display = "block";
+  window.scrollTo({top: 0, behavior: "smooth"});
+}
+
+document.getElementById("reset").addEventListener("click", () => {
+  document.getElementById("result").style.display = "none";
+  document.getElementById("select").style.display = "block";
+  window.scrollTo({top: 0, behavior: "smooth"});
+});
+</script>
+</body>
+</html>
