@@ -1,4 +1,3 @@
-```python
 import streamlit as st
 
 # ==================================================
@@ -532,4 +531,3 @@ st.markdown("""
     포켓몬 이미지 출처: PokéAPI Sprites 저장소
 </div>
 """, unsafe_allow_html=True)
-```
